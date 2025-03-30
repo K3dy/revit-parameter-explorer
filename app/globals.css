@@ -1,0 +1,83 @@
+/* Add to globals.css */
+
+/* Better resize handling */
+body.resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.resizing * {
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* Allow pointer events on the resize handle itself */
+body.resizing [data-resize-handle] {
+  pointer-events: auto !important;
+}
+
+/* Add a subtle visual indicator when hovering near the resize area */
+.sidebar-resize-area {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 12px;
+  height: 100%;
+  z-index: 50;
+  cursor: col-resize;
+}
+
+.sidebar-resize-area::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background-color: #e5e7eb;
+  transition: background-color 0.2s, width 0.2s;
+}
+
+.sidebar-resize-area:hover::after {
+  background-color: #3b82f6;
+  width: 3px;
+}
+
+body.resizing .sidebar-resize-area::after {
+  background-color: #2563eb;
+  width: 3px;
+}
+
+/* Add indicator dots to make the handle more visible */
+.sidebar-resize-dots {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 40px;
+  width: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.sidebar-resize-dots::before,
+.sidebar-resize-dots::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #6b7280;
+}
+
+.sidebar-resize-area:hover .sidebar-resize-dots {
+  opacity: 1;
+}
+
+.sidebar-resize-area:hover .sidebar-resize-dots::before,
+.sidebar-resize-area:hover .sidebar-resize-dots::after {
+  background-color: #3b82f6;
+}
