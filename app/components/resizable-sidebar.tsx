@@ -97,35 +97,19 @@ export function ResizableSidebar({
     >
       {children}
       
-      {/* Enhanced resize handle with better visibility */}
+      {/* Resize handle */}
       <div
-        className="absolute top-0 right-0 h-full flex items-center justify-center"
+        className="absolute top-0 right-0 h-full w-3 cursor-col-resize z-50"
         style={{
-          width: '12px',
           right: '-6px',
-          cursor: 'col-resize',
-          zIndex: 50,
-          touchAction: 'none'
         }}
         onMouseDown={handleMouseDown}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          const touch = e.touches[0];
-          startXRef.current = touch.clientX;
-          startWidthRef.current = width;
-          setIsResizing(true);
-          document.body.classList.add('resizing');
-        }}
       >
-        {/* Visible line element */}
+        {/* Visible resize line */}
         <div 
-          className={`rounded transition-colors ${
-            isResizing ? 'bg-blue-500 w-2' : 'bg-gray-400 w-1 hover:bg-blue-400 hover:w-2'
+          className={`absolute top-0 left-1/2 transform -translate-x-1/2 h-full transition-all duration-200 ${
+            isResizing ? 'bg-blue-500 w-1' : 'bg-gray-300 w-0.5 group-hover:bg-blue-400 group-hover:w-1'
           }`}
-          style={{ 
-            height: '100%',
-            transition: 'width 0.1s, background-color 0.2s'
-          }} 
         />
       </div>
     </div>
