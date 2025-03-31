@@ -1,18 +1,21 @@
 // lib/services/aps.ts
 import { AuthenticationClient, ResponseType, Scopes } from "@aps_sdk/authentication";
 import { DataManagementClient } from "@aps_sdk/data-management";
-import { Hub, Project, FolderContent, Version, UserProfile, SessionData } from "@/types";
+import { Hub, Project, FolderContent, Version, UserProfile, SessionData, View } from "@/types";
 import { Hubs, HubData, ProjectData, TopFolderData, FolderContentsData, VersionData } from "@aps_sdk/data-management/dist/model";
 import { UserInfo } from "@aps_sdk/authentication/dist/model";
+import { ModelDerivativeClient, ModelViewsDataMetadata, PropertiesDataCollection } from "@aps_sdk/model-derivative";
 
 const authenticationClient = new AuthenticationClient();
 const dataManagementClient = new DataManagementClient();
+const modelDerivativeClient = new ModelDerivativeClient();
+
 
 // Using environment variables for configuration
 const APS_CLIENT_ID = process.env.APS_CLIENT_ID!;
 const APS_CLIENT_SECRET = process.env.APS_CLIENT_SECRET!;
 const APS_CALLBACK_URL = process.env.APS_CALLBACK_URL!;
-const INTERNAL_TOKEN_SCOPES = [Scopes.DataRead, Scopes.ViewablesRead];
+const INTERNAL_TOKEN_SCOPES = [Scopes.DataRead, Scopes.DataWrite, Scopes.ViewablesRead];
 const PUBLIC_TOKEN_SCOPES = [Scopes.ViewablesRead];
 
 export const getAuthorizationUrl = (): string => {
@@ -134,4 +137,26 @@ export const getItemVersions = async (projectId: string, itemId: string, accessT
         }
     });
     return versions;
+};
+
+export const getModelViews = async (versionUrn: string, accessToken: string): Promise<View[]> => {
+    const views: View[] = [];
+    const resp = await modelDerivativeClient.getModelViews(versionUrn, {region: "EMEA", accessToken });
+    resp.data.metadata?.map((view: ModelViewsDataMetadata) => {
+        if (view.guid) {
+            views.push({
+                guid: view.guid,
+                name: view.name,
+                role: view.role,
+                urn: versionUrn,
+            });
+        }
+    });
+    return views;
+};
+
+export const getAllProperties = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<PropertiesDataCollection[]> => {
+    const resp = await modelDerivativeClient.getAllProperties(versionUrn, modelGuid, {region: "EMEA", accessToken, forceget: "true" });
+    const properties = resp.data.collection;
+    return properties;
 };

@@ -33,6 +33,13 @@ export interface OAuthToken {
     id: string;
     name: string;
   }
+
+  export interface View {
+    urn: string;
+    guid: string;
+    name: string;
+    role: string;
+  }
   
   export interface TreeNode {
     id: string;

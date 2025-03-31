@@ -12,6 +12,7 @@
   "dependencies": {
     "@aps_sdk/authentication": "^1.0.0",
     "@aps_sdk/data-management": "^1.0.1",
+    "@aps_sdk/model-derivative": "^1.1.0",
     "@hookform/resolvers": "^3.3.2",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
