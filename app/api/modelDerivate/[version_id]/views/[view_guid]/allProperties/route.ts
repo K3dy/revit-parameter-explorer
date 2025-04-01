@@ -1,6 +1,6 @@
 // app/api/modelDerivate/[view_id]/views/[view_guid]route.ts
 import { getAuthTokens } from "@/lib/server/auth";
-import { getAllProperties } from "@/lib/services/aps";
+import { getAllProperties, getObjectTree } from "@/lib/services/aps";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest, { params }: { params: { version_id: string; view_guid: string } }) {
@@ -14,7 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: { version_
     console.log("test", version_id.replace("%2F", "/"), view_guid);
     try {
         const allProperties = await getAllProperties(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
-        return Response.json(allProperties);
+        const objectTree = await getObjectTree(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
+        return Response.json([allProperties, objectTree]);
     } catch (error) {
         console.error("Error getting all properties:", error);
         return Response.json({ error: "Failed to fetch all properties" }, { status: 500 });

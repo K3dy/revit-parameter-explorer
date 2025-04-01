@@ -4,7 +4,7 @@ import { DataManagementClient } from "@aps_sdk/data-management";
 import { Hub, Project, FolderContent, Version, UserProfile, SessionData, View } from "@/types";
 import { Hubs, HubData, ProjectData, TopFolderData, FolderContentsData, VersionData } from "@aps_sdk/data-management/dist/model";
 import { UserInfo } from "@aps_sdk/authentication/dist/model";
-import { ModelDerivativeClient, ModelViewsDataMetadata, PropertiesDataCollection } from "@aps_sdk/model-derivative";
+import { ModelDerivativeClient, ModelViewsDataMetadata, ObjectTreeDataObjects, PropertiesDataCollection } from "@aps_sdk/model-derivative";
 
 const authenticationClient = new AuthenticationClient();
 const dataManagementClient = new DataManagementClient();
@@ -159,4 +159,10 @@ export const getAllProperties = async (versionUrn: string, modelGuid : string, a
     const resp = await modelDerivativeClient.getAllProperties(versionUrn, modelGuid, {region: "EMEA", accessToken, forceget: "true" });
     const properties = resp.data.collection;
     return properties;
+};
+
+export const getObjectTree = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<ObjectTreeDataObjects[]> => {
+    const resp = await modelDerivativeClient.getObjectTree(versionUrn, modelGuid, {region: "EMEA", accessToken, forceget: "true" });
+    const objectTree = resp.data.objects;
+    return objectTree;
 };
