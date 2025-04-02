@@ -1,22 +1,25 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserRound, Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserRound } from "lucide-react";
 import { Sidebar } from "./components/sidebar";
 import { useUser } from "@/lib/client/auth";
-import { ObjectTreeDataObjects, PropertiesDataCollection } from "@aps_sdk/model-derivative";
+import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
+import { Spinner } from "@/components/ui/spinner";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+
 import PropertiesList from "./components/propertiesList";
+import Tree from "./components/objectsTree";
+import { ObjectTreeData } from "@/types";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
     const { user, loading } = useUser();
-    const [sidebarWidth, setSidebarWidth] = useState(300);
+    const [isLoading, setLoading] = useState(false);
     const [properties, setProperties] = useState<PropertiesDataCollection[]>([]);
-    const [objectTree, setObjectTree] = useState<ObjectTreeDataObjects[]>([]);
-    const [isResizing, setIsResizing] = useState(false);
-    const sidebarRef = useRef<HTMLDivElement>(null);
-    const startXRef = useRef(0);
-    const startWidthRef = useRef(0);
+    const [objectTree, setObjectTree] = useState<ObjectTreeData[]>([]);
 
     const handleLogin = () => {
         window.location.href = "/api/auth/login";
@@ -35,139 +38,82 @@ export default function Home() {
     };
 
     const handleViewSelect = async (type: string, viewGuid: string, itemUrn: string) => {
-        const res = await fetch(`/api/modelDerivate/${itemUrn.replace("/", "%2F")}/views/${viewGuid}/allProperties`);
-        if (!res.ok) throw new Error("Failed to fetch contents");
-        const data = await res.json();
-        setProperties(data[0]);
-        setObjectTree(data[1]);
-    };
-
-    // Start resizing
-    const handleMouseDown = (e: React.MouseEvent) => {
-        e.preventDefault();
-        setIsResizing(true);
-        startXRef.current = e.clientX;
-        startWidthRef.current = sidebarWidth;
-        document.body.classList.add("resizing");
-    };
-
-    // Handle resize and cleanup
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!isResizing) return;
-
-            const delta = e.clientX - startXRef.current;
-            const newWidth = Math.max(200, Math.min(600, startWidthRef.current + delta));
-            setSidebarWidth(newWidth);
-        };
-
-        const handleMouseUp = () => {
-            if (isResizing) {
-                setIsResizing(false);
-                document.body.classList.remove("resizing");
-
-                try {
-                    localStorage.setItem("sidebar-width", sidebarWidth.toString());
-                } catch (e) {
-                    console.error("Failed to save sidebar width", e);
-                }
+        setLoading(true);
+        let data = { isLoading: true, allProperties: [], objectTreeWithProperties: [] };
+        while (data.isLoading) {
+            const res = await fetch(`/api/modelDerivate/${itemUrn.replace("/", "%2F")}/views/${viewGuid}/allProperties`);
+            if (!res.ok) throw new Error("Failed to fetch contents");
+            data = await res.json();
+            if (data.isLoading) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
             }
-        };
-
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-
-        return () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-            document.body.classList.remove("resizing");
-        };
-    }, [isResizing, sidebarWidth]);
-
-    // Load saved width
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        try {
-            const savedWidth = localStorage.getItem("sidebar-width");
-            if (savedWidth) {
-                const width = parseInt(savedWidth);
-                if (!isNaN(width) && width >= 200 && width <= 600) {
-                    setSidebarWidth(width);
-                }
-            }
-        } catch (e) {
-            console.error("Failed to load sidebar width", e);
         }
-    }, []);
+        setLoading(false);
+        setProperties(data.allProperties);
+        setObjectTree(data.objectTreeWithProperties);
+    };
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <div className="flex items-center">
+                <Spinner size="large" />
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col h-screen">
             {/* Header */}
-            <header className="h-50 flex items-center justify-between px-5 bg-white border-b shadow-sm flex-shrink-0">
-                <div className="flex items-center">
-                    <h1 className="ml-5 text-xl font-bold">SKANSKA</h1>
-                </div>
-
-                <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex items-center gap-2">
-                    <UserRound className="h-2 w-2" />
-                    {user ? `Logout (${user.name})` : "Login"}
-                </Button>
+            <header className="bg-blue-600 text-white p-4 shadow">
+                <nav className="container mx-auto flex justify-between items-center">
+                    <h1 className="text-xl font-bold">SKANSKA</h1>
+                    <div className="flex items-center gap-8">
+                        <div className="flex items-center space-x-4">
+                            <Label className="text-sm text-gray-700">Server:</Label>
+                            <Tabs defaultValue="US">
+                                <TabsList>
+                                    <TabsTrigger value="US">US</TabsTrigger>
+                                    <TabsTrigger value="EMEA">EMEA</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                        </div>
+                        <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex items-center gap-2">
+                            <UserRound />
+                            {user ? `Logout (${user.name})` : "Login"}
+                        </Button>
+                    </div>
+                </nav>
             </header>
 
             {user ? (
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar with resizing */}
-                    <div ref={sidebarRef} className="h-full bg-white relative" style={{ width: `${sidebarWidth}px`, flexShrink: 0 }}>
-                        <Sidebar onViewSelected={handleViewSelect} />
-
-                        {/* Resize handle */}
-                        <div
-                            className="absolute top-0 right-0 w-3 h-full cursor-col-resize"
-                            style={{
-                                position: "absolute",
-                                top: 0,
-                                right: "-1px",
-                                width: "10px",
-                                height: "100%",
-                                cursor: "col-resize",
-                                zIndex: 50,
-                            }}
-                            onMouseDown={handleMouseDown}
-                        >
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: "50%",
-                                    transform: "translateX(-50%)",
-                                    width: "4px",
-                                    height: "100%",
-                                    backgroundColor: isResizing ? "#3b82f6" : "#e5e7eb",
-                                    transition: "background-color 0.2s",
-                                }}
-                            />
+                <ResizablePanelGroup direction="horizontal" className="max-w-md rounded-lg border">
+                    <ResizablePanel defaultSize={20}>
+                        <div className="h-full bg-white relative">
+                            <Sidebar onViewSelected={handleViewSelect} />
                         </div>
-                    </div>
-
-                    {/* Main content / Viewer */}
-                    <div className="flex-1 overflow-hidden p-4">
-                        <div className="p-4">
-                            <h2 className="text-xl font-bold mb-4">Properties</h2>
-                            <PropertiesList data={properties.slice(0, 100)} />
+                    </ResizablePanel>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={80}>
+                        <div className="flex-1 p-4">
+                            {isLoading ? (
+                                <div className="flex items-center">
+                                    <Spinner size="large" />
+                                </div>
+                            ) : (
+                                <div className="columns-3 gap-4">
+                                    <div className="p-4">
+                                        <h2 className="text-xl font-bold mb-4">Tree</h2>
+                                        <Tree data={objectTree.slice(0, 100)} />
+                                    </div>
+                                    <div className="p-4">
+                                        <h2 className="text-xl font-bold mb-4">Properties</h2>
+                                        <PropertiesList data={properties.slice(0, 100)} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                </div>
+                    </ResizablePanel>
+                </ResizablePanelGroup>
             ) : (
                 <div className="flex-1 flex flex-col justify-center items-center">
                     <h2 className="text-2xl font-bold mb-4">Welcome to Construction Cloud Browser</h2>

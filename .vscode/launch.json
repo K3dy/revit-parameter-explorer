@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Next.js + Turbopack: debug server",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev",
+        "skipFiles": ["<node_internals>/**"],
+        "resolveSourceMapLocations": [
+          "${workspaceFolder}/**",
+          "!**/node_modules/**"
+        ],
+        "outFiles": ["${workspaceFolder}/.next/**/*.js"],
+      }
+    ]
+  }

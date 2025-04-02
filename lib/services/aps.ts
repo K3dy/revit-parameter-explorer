@@ -155,10 +155,15 @@ export const getModelViews = async (versionUrn: string, accessToken: string): Pr
     return views;
 };
 
-export const getAllProperties = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<PropertiesDataCollection[]> => {
+export const getAllProperties = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<{ properties: PropertiesDataCollection[], isLoading: boolean }> => {
     const resp = await modelDerivativeClient.getAllProperties(versionUrn, modelGuid, {region: "EMEA", accessToken, forceget: "true" });
-    const properties = resp.data.collection;
-    return properties;
+    const properties: PropertiesDataCollection[] = [];
+    if (resp.isProcessing) {
+        console.log(resp)
+    } else {
+        properties.push(...resp.data.collection);
+    }
+    return {properties: properties, isLoading: resp.isProcessing };
 };
 
 export const getObjectTree = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<ObjectTreeDataObjects[]> => {

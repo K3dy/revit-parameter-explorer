@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Revit Parameters Browser',
-  description: 'Browse and view content from Autodesk Construction Cloud',
+  description: 'Browse and view content from Revit models',
 }
 
 export default function RootLayout({

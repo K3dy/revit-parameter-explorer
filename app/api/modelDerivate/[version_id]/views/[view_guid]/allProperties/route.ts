@@ -1,6 +1,8 @@
 // app/api/modelDerivate/[view_id]/views/[view_guid]route.ts
 import { getAuthTokens } from "@/lib/server/auth";
 import { getAllProperties, getObjectTree } from "@/lib/services/aps";
+import { ObjectTreeData } from "@/types";
+import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest, { params }: { params: { version_id: string; view_guid: string } }) {
@@ -14,8 +16,34 @@ export async function GET(request: NextRequest, { params }: { params: { version_
     console.log("test", version_id.replace("%2F", "/"), view_guid);
     try {
         const allProperties = await getAllProperties(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
+        
+        if (allProperties.isLoading) {
+            return Response.json({isLoading: false, allProperties: [], objectTreeWithProperties: []}, { status: 200 });
+        }
+
+        const propertiesMap = new Map<number, PropertiesDataCollection>();
+        allProperties.properties.forEach((prop) => propertiesMap.set(prop.objectid, prop));
+        // console.log("propertiesMap", propertiesMap);
+
         const objectTree = await getObjectTree(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
-        return Response.json([allProperties, objectTree]);
+
+        const  attachProperties = (objects: ObjectTreeData[]): ObjectTreeData[] =>  {
+            objects.map(object => {
+                const property = propertiesMap.get(object.objectid);
+                if (property) {
+                    object.properties = property.properties;
+                }
+                if (object.objects) {
+                    attachProperties(object.objects as ObjectTreeData[]);
+                }
+            });
+            return objects;
+        }
+
+        const objectTreeWithProperties = attachProperties(objectTree);
+
+
+        return Response.json({isLoading: false, allProperties: allProperties, objectTreeWithProperties:objectTreeWithProperties});
     } catch (error) {
         console.error("Error getting all properties:", error);
         return Response.json({ error: "Failed to fetch all properties" }, { status: 500 });
