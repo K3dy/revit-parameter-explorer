@@ -40,13 +40,13 @@ const PropertiesList: React.FC<PropertiesListProps> = ({ data }) => {
   return (
     <div className="w-full">
       {/* Search and Sort Controls */}
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex gap-4">
         <input
           type="text"
           placeholder="Search by name or ID..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="px-3 py-1 border rounded w-1/2"
+          className="px-3 py-1 border rounded"
         />
         <select 
           value={sortKey} 
@@ -62,7 +62,7 @@ const PropertiesList: React.FC<PropertiesListProps> = ({ data }) => {
       {sortedData.map(item => (
         <div 
           key={item.objectid} 
-          className="mb-2 border rounded overflow-hidden"
+          className="mb-2 "
         >
           {/* Panel Header */}
           <button 

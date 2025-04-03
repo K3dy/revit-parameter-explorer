@@ -9,7 +9,7 @@ import { useUser } from "@/lib/client/auth";
 import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
 import { Spinner } from "@/components/ui/spinner";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-
+import Image from "next/image";
 import PropertiesList from "./components/propertiesList";
 import Tree from "./components/objectsTree";
 import { ObjectTreeData } from "@/types";
@@ -20,6 +20,8 @@ export default function Home() {
     const [isLoading, setLoading] = useState(false);
     const [properties, setProperties] = useState<PropertiesDataCollection[]>([]);
     const [objectTree, setObjectTree] = useState<ObjectTreeData[]>([]);
+    const [server, setServer] = useState("US");
+    const [error, setError] = useState<string | null>(null);
 
     const handleLogin = () => {
         window.location.href = "/api/auth/login";
@@ -39,88 +41,142 @@ export default function Home() {
 
     const handleViewSelect = async (type: string, viewGuid: string, itemUrn: string) => {
         setLoading(true);
-        let data = { isLoading: true, allProperties: [], objectTreeWithProperties: [] };
-        while (data.isLoading) {
-            const res = await fetch(`/api/modelDerivate/${itemUrn.replace("/", "%2F")}/views/${viewGuid}/allProperties`);
-            if (!res.ok) throw new Error("Failed to fetch contents");
-            data = await res.json();
-            if (data.isLoading) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-        }
-        setLoading(false);
-        setProperties(data.allProperties);
-        setObjectTree(data.objectTreeWithProperties);
-    };
+        setError(null);
 
-    if (loading) {
-        return (
-            <div className="flex items-center">
-                <Spinner size="large" />
-            </div>
-        );
-    }
+        const maxAttempts = 150;
+        let attempts = 0;
+
+        try {
+            while (attempts < maxAttempts) {
+                const res = await fetch(`/api/modelDerivate/${itemUrn.replace("/", "%2F")}/views/${viewGuid}/allProperties`);
+
+                if (!res.ok) {
+                    throw new Error(`Failed to load model data (${res.status}: ${res.statusText})`);
+                }
+
+                const data = await res.json();
+                console.log("Attempt", attempts + 1, "data:", data);
+
+                if (!data.isProcessing) {
+                    setProperties(data.properties);
+                    setObjectTree(data.objectTreeWithProperties);
+                    setLoading(false);
+                    return;
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                attempts++;
+            }
+
+            throw new Error("Timeout: Model data is taking too long to load. Please try again later.");
+        } catch (error) {
+            console.error("Error fetching view properties:", error);
+            setError(error instanceof Error ? error.message : "An unexpected error occurred");
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex flex-col h-screen">
             {/* Header */}
-            <header className="bg-blue-600 text-white p-4 shadow">
-                <nav className="container mx-auto flex justify-between items-center">
-                    <h1 className="text-xl font-bold">SKANSKA</h1>
+            <header className="bg-black text-white p-4">
+                <nav className="flex justify-between items-center">
                     <div className="flex items-center gap-8">
-                        <div className="flex items-center space-x-4">
-                            <Label className="text-sm text-gray-700">Server:</Label>
-                            <Tabs defaultValue="US">
-                                <TabsList>
-                                    <TabsTrigger value="US">US</TabsTrigger>
-                                    <TabsTrigger value="EMEA">EMEA</TabsTrigger>
+                        <Image src="/aps-logo.svg" alt="APS Logo" width={180} height={64} className="h-12 w-auto priority" />
+                        <h1 className="text-4xl font-bold">Revit Parameter Explorer</h1>
+                    </div>
+                    <div className="flex gap-8">
+                        <div className="flex">
+                            <Label className="text-xl px-2">Server:</Label>
+                            <Tabs className=" bg-white text-black p-1 rounded-md" defaultValue="US" value={server} onValueChange={setServer}>
+                                <TabsList defaultValue="US">
+                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="US">
+                                        US
+                                    </TabsTrigger>
+                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="EMEA">
+                                        EMEA
+                                    </TabsTrigger>
+                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="AUS">
+                                        AUS
+                                    </TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </div>
-                        <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex items-center gap-2">
-                            <UserRound />
-                            {user ? `Logout (${user.name})` : "Login"}
-                        </Button>
+                        {loading ? (
+                            <div className="flex items-center">
+                                <Spinner size="small" />
+                            </div>
+                        ) : (
+                            <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex border-2">
+                                <UserRound />
+                                {user ? (
+                                    <>
+                                        <strong className="text-xl">Logout</strong> ({user.name})
+                                    </>
+                                ) : (
+                                    <strong className="text-xl">Login</strong>
+                                )}
+                            </Button>
+                        )}
                     </div>
                 </nav>
             </header>
 
-            {user ? (
-                <ResizablePanelGroup direction="horizontal" className="max-w-md rounded-lg border">
+            {loading ? (
+                <div className="flex-1 h-full flex justify-center items-center">
+                    <Spinner size="large" className="text-black" />
+                </div>
+            ) : user ? (
+                <ResizablePanelGroup direction="horizontal" className="border">
                     <ResizablePanel defaultSize={20}>
-                        <div className="h-full bg-white relative">
+                        <div className="h-full bg-white">
                             <Sidebar onViewSelected={handleViewSelect} />
                         </div>
                     </ResizablePanel>
                     <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={80}>
-                        <div className="flex-1 p-4">
-                            {isLoading ? (
-                                <div className="flex items-center">
-                                    <Spinner size="large" />
+                    <ResizablePanel>
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center h-full gap-4">
+                                <Spinner size="large" />
+                                <p className="text-gray-600">Autodesk is preparing your Revit model parameters for viewing. Please wait...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center h-full gap-4">
+                                <div className="max-w-md p-4 text-center">
+                                    <h3 className="text-xl font-bold text-red-600 mb-2">Error</h3>
+                                    <p className="text-gray-800 mb-4">{error}</p>
+                                    <Button onClick={() => setError(null)} variant="outline" className="bg-white">
+                                        Dismiss
+                                    </Button>
                                 </div>
-                            ) : (
-                                <div className="columns-3 gap-4">
-                                    <div className="p-4">
-                                        <h2 className="text-xl font-bold mb-4">Tree</h2>
-                                        <Tree data={objectTree.slice(0, 100)} />
-                                    </div>
-                                    <div className="p-4">
-                                        <h2 className="text-xl font-bold mb-4">Properties</h2>
-                                        <PropertiesList data={properties.slice(0, 100)} />
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-4 h-[calc(100vh-8rem)]">
+                                <div className="p-4 overflow-hidden">
+                                    <h2 className="text-xl font-bold mb-4">Tree</h2>
+                                    <div className="h-[calc(100%-2rem)] overflow-y-auto">
+                                        <Tree data={objectTree} />
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                                <div className="p-4 overflow-hidden">
+                                    <h2 className="text-xl font-bold mb-4">Properties</h2>
+                                    <div className="h-[calc(100%-2rem)] overflow-y-auto">
+                                        <PropertiesList data={properties} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </ResizablePanel>
                 </ResizablePanelGroup>
             ) : (
-                <div className="flex-1 flex flex-col justify-center items-center">
-                    <h2 className="text-2xl font-bold mb-4">Welcome to Construction Cloud Browser</h2>
-                    <p className="text-gray-600 mb-6 text-center max-w-md">Please log in with your Autodesk account to browse your Construction Cloud projects and view models.</p>
-                    <Button onClick={handleLogin} size="lg">
-                        Login with Autodesk
-                    </Button>
+                <div className="flex-1 h-full flex">
+                    <div className="w-full h-1/2 flex flex-col justify-center items-center">
+                        <h2 className="text-4xl font-bold mb-4 text-center">Welcome to Revit Parameter Explorer</h2>
+                        <p className="text-gray-600 mb-6 text-center max-w-md">Please log in with your Autodesk account to browse your Construction Cloud projects and view models.</p>
+                        <Button onClick={handleLogin} size="lg" className="bg-blue-500 text-white hover:bg-blue-600">
+                            Login with Autodesk
+                        </Button>
+                    </div>
                 </div>
             )}
         </div>

@@ -1,4 +1,4 @@
-// app/api/modelDerivate/[view_id]/views/[view_guid]route.ts
+// app/api/modelDerivate/[view_id]/views/[view_guid]/allProperties/route.ts
 import { getAuthTokens } from "@/lib/server/auth";
 import { getAllProperties, getObjectTree } from "@/lib/services/aps";
 import { ObjectTreeData } from "@/types";
@@ -13,37 +13,44 @@ export async function GET(request: NextRequest, { params }: { params: { version_
     if (!tokens) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.log("test", version_id.replace("%2F", "/"), view_guid);
     try {
         const allProperties = await getAllProperties(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
-        
-        if (allProperties.isLoading) {
-            return Response.json({isLoading: false, allProperties: [], objectTreeWithProperties: []}, { status: 200 });
+        const res: {
+            isProcessing: boolean;
+            properties: PropertiesDataCollection[];
+            objectTreeWithProperties: ObjectTreeData[];
+        } = {
+            isProcessing: true,
+            properties: [],
+            objectTreeWithProperties: [],
+        };
+
+        if (!allProperties.isProcessing) {
+            const propertiesMap = new Map<number, PropertiesDataCollection>();
+            allProperties.properties.forEach((prop) => propertiesMap.set(prop.objectid, prop));
+
+            const objectTree = await getObjectTree(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
+
+            const attachProperties = (objects: ObjectTreeData[]): ObjectTreeData[] => {
+                objects.map((object) => {
+                    const property = propertiesMap.get(object.objectid);
+                    if (property) {
+                        object.properties = property.properties;
+                    }
+                    if (object.objects) {
+                        attachProperties(object.objects as ObjectTreeData[]);
+                    }
+                });
+                return objects;
+            };
+
+            const objectTreeWithProperties = attachProperties(objectTree);
+            res.isProcessing = false;
+            res.properties = allProperties.properties;
+            res.objectTreeWithProperties = objectTreeWithProperties;
         }
 
-        const propertiesMap = new Map<number, PropertiesDataCollection>();
-        allProperties.properties.forEach((prop) => propertiesMap.set(prop.objectid, prop));
-        // console.log("propertiesMap", propertiesMap);
-
-        const objectTree = await getObjectTree(version_id.replace("%2F", "/"), view_guid, tokens.internalToken.access_token);
-
-        const  attachProperties = (objects: ObjectTreeData[]): ObjectTreeData[] =>  {
-            objects.map(object => {
-                const property = propertiesMap.get(object.objectid);
-                if (property) {
-                    object.properties = property.properties;
-                }
-                if (object.objects) {
-                    attachProperties(object.objects as ObjectTreeData[]);
-                }
-            });
-            return objects;
-        }
-
-        const objectTreeWithProperties = attachProperties(objectTree);
-
-
-        return Response.json({isLoading: false, allProperties: allProperties, objectTreeWithProperties:objectTreeWithProperties});
+        return Response.json(res);
     } catch (error) {
         console.error("Error getting all properties:", error);
         return Response.json({ error: "Failed to fetch all properties" }, { status: 500 });

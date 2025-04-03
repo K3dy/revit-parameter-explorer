@@ -2,7 +2,6 @@
 const nextConfig = {
   experimental: {
     turbo: {
-      // Enable source maps specifically for Turbopack
       resolveSourceMapLocations: ["**/*"]
     }
   }
