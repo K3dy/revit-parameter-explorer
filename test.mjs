@@ -9,7 +9,6 @@ const hub_id = "b.c2691772-1c72-44c6-be19-2847c2877e54";
 const project_id = "b.978b65ea-2e78-46ee-936f-f9d0b5a97907";
 const urn = "urn:adsk.wipemea:dm.lineage:cOeDfhS9Ry6W4nunytA56A?";
 console.log(btoa(urn));
-const guid = "2158c7ec-42c3-d583-683c-35895cd1afd9";
 
 const dataManagementClient = new DataManagementClient();
 const modelDerivativeClient = new ModelDerivativeClient();
@@ -73,7 +72,7 @@ const getModelViews = async (urn, accessToken) => {
     console.log(modelViews.data);
 };
 
-// getModelViews(btoa(urn), token);
+getModelViews(btoa(urn), token);
 
 const getAllProperties = async (urn, modelGuid, accessToken) => {
     let allProperties = await modelDerivativeClient.getAllProperties(urn, modelGuid, {region: "EMEA", accessToken });

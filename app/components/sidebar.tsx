@@ -183,6 +183,7 @@ export function Sidebar({ onViewSelected }: SidebarProps) {
                                     id: "",
                                     name: "Error: No views found",
                                     type: "error" as const,
+                                    isOpen: false
                                 },
                             ];
                             break;
@@ -242,11 +243,11 @@ export function Sidebar({ onViewSelected }: SidebarProps) {
                     return <File className="h-4 w-4 text-gray-500" />;
                 case "version":
                     return <Clock className="h-4 w-4 text-purple-500" />;
-                    case "view":
-                        return <Eye className="h-4 w-4 text-blue-500" />;
-                    case "error":
-                        return <Box className="h-4 w-4 text-red-500" />;
-                    default:
+                case "view":
+                    return <Eye className="h-4 w-4 text-blue-500" />;
+                case "error":
+                    return <Box className="h-4 w-4 text-red-500" />;
+                default:
                     return <FolderClosed className="h-4 w-4" />;
             }
         };

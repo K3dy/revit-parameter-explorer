@@ -5,7 +5,14 @@ import { ObjectTreeData } from "@/types";
 import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
 import { NextRequest } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: { version_id: string; view_guid: string } }) {
+type Props = {
+    params: {
+        version_id: string;
+        view_guid: string;
+    }
+}
+
+export async function GET(request: NextRequest, { params }: Props) {
     const { version_id, view_guid } = await params;
 
     const tokens = await getAuthTokens();
