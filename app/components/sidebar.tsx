@@ -253,7 +253,7 @@ export function Sidebar({ onViewSelected }: SidebarProps) {
         };
 
         return (
-            <div key={node.id} className="w-full">
+            <div key={node.id}>
                 <div className="flex items-center px-2 py-1 hover:bg-gray-100 rounded cursor-pointer" style={{ paddingLeft: `${level * 16 + 8}px` }} onClick={() => handleNodeClick(node)}>
                     {node.type !== "view" && (
                         <div className="mr-1">
@@ -271,13 +271,13 @@ export function Sidebar({ onViewSelected }: SidebarProps) {
 
     return (
         <Card className="h-full">
-            <CardContent className="p-2 h-full overflow-auto">
+            <CardContent className="p-2 overflow-auto">
                 {loading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                     </div>
                 ) : tree.length > 0 ? (
-                    <div className="w-full">{tree.map((node) => renderTreeNode(node))}</div>
+                    <div>{tree.map((node) => renderTreeNode(node))}</div>
                 ) : (
                     <div className="flex justify-center items-center h-full">
                         <p className="text-gray-500">No hubs found</p>

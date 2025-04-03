@@ -3,14 +3,7 @@ import { getAuthTokens } from "@/lib/server/auth";
 import { getItemVersions } from "@/lib/services/aps";
 import { NextRequest } from "next/server";
 
-type Props = {
-    params: {
-        item_id: string;
-        project_id: string;
-    };
-};
-
-export async function GET(request: NextRequest, { params }: Props) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ item_id: string; project_id: string }> }) {
     const { project_id, item_id } = await params;
 
     const tokens = await getAuthTokens();

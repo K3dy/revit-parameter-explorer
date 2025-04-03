@@ -1,17 +1,33 @@
+/* app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --background: #ffffff;
-  --foreground: #ffffff;
-  --primary: #1A2632;
-  --primary-foreground: #ffffff;
+  --foreground: #000000;
+  --primary: #3b82f6;
+  --primary-foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #121c37;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+}
+
+.dark {
+  --background: #262626;
+  --foreground: #f0f9ff;
+  --primary: #3b82f6;
+  --primary-foreground: #f0f9ff;
+  --card: #171717;
+  --card-foreground: #dce7f9;
+  --muted: #f1f5f9;
+  --muted-foreground: #7d8fb1;
 }
 
 @layer base {
   body {
-    @apply font-sans;
+    @apply bg-background text-foreground font-sans;
   }
 }
 

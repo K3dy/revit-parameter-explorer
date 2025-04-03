@@ -158,7 +158,6 @@ export const getModelViews = async (versionUrn: string, accessToken: string): Pr
 export const getAllProperties = async (versionUrn: string, modelGuid : string, accessToken: string): Promise<{ properties: PropertiesDataCollection[], isProcessing: boolean }> => {
     const resp = await modelDerivativeClient.getAllProperties(versionUrn, modelGuid, {region: "EMEA", accessToken, forceget: "true" });
     const properties: PropertiesDataCollection[] = [];
-    console.log("aps", resp)
     if (resp.data?.collection) {
         properties.push(...resp.data.collection);
     }

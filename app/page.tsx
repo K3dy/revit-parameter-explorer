@@ -14,6 +14,7 @@ import PropertiesList from "./components/propertiesList";
 import Tree from "./components/objectsTree";
 import { ObjectTreeData } from "@/types";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function Home() {
     const { user, loading } = useUser();
@@ -39,7 +40,7 @@ export default function Home() {
         };
     };
 
-    const handleViewSelect = async (type: string, viewGuid: string, itemUrn: string) => {
+    const handleModelViewSelect = async (type: string, viewGuid: string, itemUrn: string) => {
         setLoading(true);
         setError(null);
 
@@ -79,42 +80,56 @@ export default function Home() {
     return (
         <div className="flex flex-col h-screen">
             {/* Header */}
-            <header className="bg-black text-white p-4">
-                <nav className="flex justify-between items-center">
-                    <div className="flex items-center gap-8">
+            <header className="bg-black  p-4">
+                <nav className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex items-center gap-4 justify-center lg:justify-start">
                         <Image src="/aps-logo.svg" alt="APS Logo" width={180} height={64} className="h-12 w-auto priority" />
-                        <h1 className="text-4xl font-bold">Revit Parameter Explorer</h1>
+                        <h1 className="text-2xl md:text-4xl text-white font-bold">Revit Parameter Explorer</h1>
                     </div>
-                    <div className="flex gap-8">
-                        <div className="flex">
-                            <Label className="text-xl px-2">Server:</Label>
-                            <Tabs className=" bg-white text-black p-1 rounded-md" defaultValue="US" value={server} onValueChange={setServer}>
+
+                    <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-end">
+                        <ThemeToggle />
+
+                        <div className="flex items-center">
+                            <Label className="text-base md:text-xl px-2">Server:</Label>
+                            <Tabs className="bg-white text-black border-2 h-10 rounded-md" defaultValue="US" value={server} onValueChange={setServer}>
                                 <TabsList defaultValue="US">
-                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="US">
+                                    <TabsTrigger
+                                        className="hover:bg-blue-300 hover:text-white data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=inactive]:text-neutral-800"
+                                        value="US"
+                                    >
                                         US
                                     </TabsTrigger>
-                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="EMEA">
+                                    <TabsTrigger
+                                        className="hover:bg-blue-300 hover:text-white data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=inactive]:text-neutral-800"
+                                        value="EMEA"
+                                    >
                                         EMEA
                                     </TabsTrigger>
-                                    <TabsTrigger className="hover:bg-blue-300 data-[state=active]:bg-blue-500 data-[state=active]:text-white" value="AUS">
+                                    <TabsTrigger
+                                        className="hover:bg-blue-300 hover:text-white data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=inactive]:text-neutral-800"
+                                        value="AUS"
+                                    >
                                         AUS
                                     </TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </div>
+
                         {loading ? (
                             <div className="flex items-center">
                                 <Spinner size="small" />
                             </div>
                         ) : (
-                            <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex border-2">
+                            <Button variant={user ? "outline" : "default"} onClick={user ? handleLogout : handleLogin} className="flex border-2 h-10 whitespace-nowrap items-center">
                                 <UserRound />
                                 {user ? (
-                                    <>
-                                        <strong className="text-xl">Logout</strong> ({user.name})
-                                    </>
+                                    <div className="flex items-center gap-1">
+                                        <strong className="md:text-xl">Logout</strong>
+                                        <span className="hidden sm:inline">({user.name})</span>
+                                    </div>
                                 ) : (
-                                    <strong className="text-xl">Login</strong>
+                                    <strong className="md:text-xl">Login</strong>
                                 )}
                             </Button>
                         )}
@@ -129,8 +144,8 @@ export default function Home() {
             ) : user ? (
                 <ResizablePanelGroup direction="horizontal" className="border">
                     <ResizablePanel defaultSize={20}>
-                        <div className="h-full bg-white">
-                            <Sidebar onViewSelected={handleViewSelect} />
+                        <div className="h-full">
+                            <Sidebar onViewSelected={handleModelViewSelect} />
                         </div>
                     </ResizablePanel>
                     <ResizableHandle withHandle />
@@ -138,7 +153,7 @@ export default function Home() {
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full gap-4">
                                 <Spinner size="large" />
-                                <p className="text-gray-600">Autodesk is preparing your Revit model parameters for viewing. Please wait...</p>
+                                <p className="text-gray-600">Revit Model parameters are beeing fetched from ACC. Please wait...</p>
                             </div>
                         ) : error ? (
                             <div className="flex flex-col items-center justify-center h-full gap-4">

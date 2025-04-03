@@ -1,12 +1,20 @@
+"use server";
+
 // app/api/modelDerivate/[view_id]/views/[view_guid]/allProperties/route.ts
 import { getAuthTokens } from "@/lib/server/auth";
 import { getAllProperties, getObjectTree } from "@/lib/services/aps";
 import { ObjectTreeData } from "@/types";
 import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
-import { NextRequest } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ version_id: string; view_guid: string }> }) {
-    const { version_id, view_guid } = await params;
+type Props = {
+    params: {
+        version_id: string;
+        view_guid: string;
+    };
+};
+
+export async function allProperties({ params }: Props) {
+    const { version_id, view_guid } = params;
 
     const tokens = await getAuthTokens();
 
