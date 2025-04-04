@@ -25,6 +25,7 @@
     "@radix-ui/react-switch": "^1.1.3",
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "@tailwindcss/typography": "^0.5.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -33,7 +34,6 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.294.0",
     "next": "15.2.4",
-    "next-cookies": "^2.0.3",
     "next-themes": "^0.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -43,7 +43,6 @@
     "shadcn-ui": "^0.9.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "tw-animate-css": "^1.2.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {

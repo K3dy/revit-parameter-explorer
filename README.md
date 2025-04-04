@@ -4,7 +4,7 @@ A web application for browsing and viewing Revit model parameters through Autode
 
 ## Overview
 
-This application connects to your Autodesk account and allows you to browse through Construction Cloud projects, navigate model hierarchies, and explore detailed Revit parameter information. It provides a convenient way to access and visualize Revit model data without needing to open the model in Revit.
+This application connects to your Autodesk account and allows you to browse through Autodesk Construction Cloud projects, navigate model hierarchies, and explore detailed Revit parameter information. It provides a convenient way to access and visualize Revit model data without needing to open the model in Revit.
 
 ![Revit Parameter Explorer Screenshot](screenshot.png)
 

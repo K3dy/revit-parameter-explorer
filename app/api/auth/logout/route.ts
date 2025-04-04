@@ -10,5 +10,6 @@ export async function GET() {
   cookieStore.delete('refresh_token');
   cookieStore.delete('expires_at');
   
+  // Return redirect directly without try-catch
   return redirect('/');
 }
