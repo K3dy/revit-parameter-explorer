@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, UserRound } from "lucide-react";
-import { Sidebar } from "./components/sidebar";
+import { Sidebar } from "./components/projectSidebar";
 import { useUser } from "@/lib/client/auth";
 import { PropertiesDataCollection } from "@aps_sdk/model-derivative";
 import { Spinner } from "@/components/ui/spinner";

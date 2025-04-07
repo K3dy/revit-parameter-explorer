@@ -8,27 +8,17 @@ This application connects to your Autodesk account and allows you to browse thro
 
 ![Revit Parameter Explorer Screenshot](screenshot.png)
 
-## Features
-
-- **Authentication** with Autodesk Platform Services
-- **Dark/Light mode** theme switching
-- **Server region selection** (US, EMEA, AUS)
-- **Project hierarchy navigation** for Autodesk Construction Cloud projects
-- **Dual panel view** with object tree and properties list
-- **Resizable panels** for customized viewing experience
-- **Responsive design** that works on desktop and mobile devices
-
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18 or later
-- npm or yarn
+- Node.js 18
+- npm
 - Autodesk Developer account with APS credentials
 
 ### Environment Setup
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file based on the `.env.example` template with your Autodesk Platform Services credentials
 
 ```
 APS_CLIENT_ID=your_client_id
@@ -60,6 +50,17 @@ npm run dev
 
 ```bash
 npm run build
+npm start
+```
+
+## Deployment from Release
+
+1. Download and extract the release zip
+2. Create a `.env` file based on the `.env.example` template with your Autodesk Platform Services credentials
+3. Install production dependencies:
+
+```bash
+npm install --production
 npm start
 ```
 
@@ -99,8 +100,3 @@ npm start
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Autodesk Platform Services for providing the APIs
-- The Next.js team for the excellent React framework
